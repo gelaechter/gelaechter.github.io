@@ -87,7 +87,7 @@
 .heti pre code {
   --at-apply: 'border-none bg-transparent p-0';
 }
-html.dark .heti pre span {
+html.dark .heti {
   --at-apply: 'text-[var(--shiki-dark)]!';
 }
 .heti .code-block-wrapper {

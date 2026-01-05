@@ -1,0 +1,258 @@
+---
+title: Embedding terminals on the web using Shiki
+published: 2026-01-04
+draft: false
+lang: 'en'
+tags:
+  - Linux
+  - Typesetting
+description: In this Post i describe how we can use Kitty's ANSI output in combination with Shiki's ANSI highlighting capabilities to render Terminals on the web
+---
+
+> [!TIP]
+>
+> :::fold[Expand this for a TLDR]
+> 
+> - Install [Kitty](https://sw.kovidgoyal.net/kitty/)
+> - Put this into your kitty.conf:
+>     ```conf
+>     clipboard_control write-clipboard read-clipboard
+>     map ctrl+shift+c combine : copy_ansi_to_clipboard : launch --type overlay-main sh -c "kitten clipboard --get-clipboard | sed -e 's|\\x1b\\\\||g' -e 's|\\x1b\\]133;[A-Z]||g' | kitten clipboard"
+>     ```
+> - Copy your output inside Kitty using <kbd>CTRL</kbd> + <kbd>SHIFT</kbd> + <kbd>C</kbd>
+> - Paste into your ANSI escape code interpreting environment:
+>     `````
+>     ```ansi
+>     $ ls --color
+>     [22;1;34mdir1[22;39m  [22;1;34mdir2[22;39m  file1  file2[m
+>     ```
+>     `````
+> - Get nicely colored terminal embeds:
+>     ```ansi
+>     $ ls --color
+>     [22;1;34mdir1[22;39m  [22;1;34mdir2[22;39m  file1  file2[m
+>     ```
+> :::
+
+This blog is made using [Astro](https://astro.build/). Im writing its contents in [Markdown](https://www.markdownguide.org/) or [MDX](https://mdxjs.com/) (a combination of Markdown and [JSX](https://legacy.reactjs.org/docs/introducing-jsx.html)). Whenever I put a codeblock into a page, like this:
+
+`````
+```js
+// the hello world program
+console.log('Hello World');
+```
+`````
+
+Astro renders that codeblock, using [Shiki](https://shiki.style/) as the highlighting engine[^1]: 
+
+```js
+// the hello world program
+console.log('Hello World');
+```
+
+import { Code } from 'astro-expressive-code/components'
+
+Shiki supports, from COBOL to Git Rebase Messages, a [myriad of languages](https://shiki.style/languages).
+Among those languages i found ANSI.
+
+## ANSI?
+
+In this case ANSI refers to [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code). They are special combinations of characters that command line programs can use to control terminal behaviour.
+They can change cursor position, style text, or (if allowed) even copy contents to your clipboard.
+For web embedding purposes I mainly care about the **text styling** aspect. 
+
+Coloring or setting the weight (light, bold) of output is often used to make a programs' output easier to understand.
+If we compare the base output of `ls`:
+```ansi
+$ ls
+dir1  dir2  file1  file2
+```
+
+With the colored output using the `--color` flag:
+
+```ansi
+$ ls --color
+[22;1;34mdir1[22;39m  [22;1;34mdir2[22;39m  file1  file2[m
+```
+
+we can discern normal files (uncolored) from a directory (blue) at a glance.
+So if we embed terminal output in our website we of course want to keep this extra information.
+
+## Getting the underlying ANSI escape codes
+
+Sadly copying these escape codes out of our terminals isn't as easy as I hoped it to be.
+When copying something from a terminal what we get most of the time is just the text with all ANSI escape codes stripped.
+This makes sense since most of the time when embedding or sharing our terminal output we have no environment that can interpret these.
+
+We could of course do some trickery by capturing our shell outputs using a terminal multiplexer like [tmux](https://en.wikipedia.org/wiki/Tmux)
+and then show the non-printing characters from our capture using cat with the `-v` option.
+That is way too many steps though. I want to just copy and paste, not remember to run tmux before-hand and all that fuss.
+
+Luckily [kitty](https://sw.kovidgoyal.net/kitty/) comes to the rescue!
+kitty is a cross-platform terminal that distinguishes itself with a wide range of features.
+Like in this case supporting copying the terminal output raw including ANSI escape codes.
+
+To allow us to do that we just have to add a shortcut to the config.
+In my case i can replace the default copy shortcut since im not using kitty for anything else.
+
+```text title="~/.config/kitty/kitty.conf"
+map ctrl+shift+c copy_ansi_to_clipboard
+```
+
+Now i can just copy from kitty, paste into my ansi marked codeblock and im golden:
+
+```ansi
+]133;A\[92mgelaechter[39m@Arch [32m~/D/Test[39m> ls --color
+]133;C\[22;1;34mdir1[22;39m  [22;1;34mdir2[22;39m  file1  file2[m
+```
+
+Hmm shiki doesn't render what i pasted... That should actually look like this:
+
+```ansi
+[92mgelaechter[39m@Arch [32m~/D/Test[39m> ls --color
+[22;1;34mdir1[22;39m  [22;1;34mdir2[22;39m  file1  file2[m
+```
+
+Maybe shiki doesn't like some of the ANSI escape codes? So let's have a look.
+
+## Understanding ANSI escape codes
+
+What `ls --color` actually outputs to the terminal is this:
+```text "ESC"
+ESC[22;1;34mdir1ESC[22;39m  ESC[22;1;34mdir2ESC[22;39m  file1  file2ESC[m
+```
+See those blue marked `ESC` parts? Every ANSI escape code starts with the ASCII Escape symbol.
+It tells the terminal that whatever comes next is a command and to be interpreted.
+It would not be displayed as a visible symbol in the browser which is why i replaced it with the String `ESC`.
+
+The type of ANSI code responsible for text formatting are called a "Select Graphic Rendition".
+Let's look at the first one:
+
+```text
+ESC[22;1;34m
+```
+
+Select Graphic Renditions are identified by the `[` that follows the Escape symbol.
+
+```text "["
+ESC[22;1;34m
+```
+
+After the terminal now knows that its dealing with a Select Graphic Rendition, the specific commands follow.
+In the first escape code these are `22`, `1` and `34`:
+
+```text /22|1|34/
+ESC[22;1;34m
+```
+
+ They tell the terminal:
+
+- `22`: Reset bold mode (all following text is no longer bold)
+- `1`: Set bold mode (all following text is now bold)
+- `34`: Set the foreground color blue (all following text itself is now blue)
+
+The `m` marks the end of the commands and with that the end of the Select Graphic Rendition sequence:
+
+```text "m"
+ESC[22;1;34m
+```
+
+So what the first ANSI escape command `ESC[22;1;34m` actually does is:\
+*Deactivate any previous boldness, then set the text blue and bold.*[^2]
+
+So ls can tell your terminal that it wants to render the following `dir1` blue and bold.
+
+### What my fish shell is producing
+
+If you now compare the escape code i showed in the example with the first escape copy of the text i copied into the code block:
+
+```text "ESC"
+ESC]133;AESC\
+```
+
+You might notice an important difference. Where we would expect a `[` there is instead a `]`. That is because the ANSI escape code were dealing with here **is not** a Select Graphic Rendition. Instead the `]` marks an Operating System Command (OSC).
+
+So it would seem that while the naive approach might work for most setups, the [fish shell](https://fishshell.com/), which i am using, adds some of these Operating System Commands and Shiki can't deal with that.
+
+Why is fish doing that though?
+Operating System Commands are less standardized than Control sequences. They are mostly used to allow controlling the terminal itself. For example did [xterm](https://en.wikipedia.org/wiki/Xterm) allow you to [set the window title and icon](https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h3-Operating-System-Commands) using `OSC 0`. So if my command would start `ESC]0;My TitleESC\` the xterm window would now be called "My Title".
+
+The `OSC 133` that fish inserts seem to be a proprietary OSC for the [FinalTerm terminal emulator](https://github.com/p-e-w/finalterm) which is [no longer maintained](https://worldwidemann.com/finally-terminated/).
+FinalTerm was meant to be context aware and the `OSC 133` sequences were meant to provide it with this context.
+
+`OSC 133 A` told it where the shell prompt started. `OSC 133 B` told it where it stopped.
+If you are interested in other OSCs the [iTerm2 documentation](https://iterm2.com/documentation-escape-codes.html) has a lot of them.
+
+## Getting rid of OSCs
+
+Since Shiki apparently can't deal with OSCs the simplest course of action would be to simply get rid of them.
+Since all OSCs start with `ESC]` and end with `ESC\` we can use kitty's scriptability and [sed](https://en.wikipedia.org/wiki/Sed) together with a regex, to remove these from the clipboard whenever we copy kittys output.
+
+Our regex would look something like this:
+```regex 
+\x1b\][^\x1b]*\x1b\\
+```
+
+Matching the following:
+1. `ESC`, expressed here as hexadecimal `0x1B` or `\x1b` in regex syntax
+2. `]`, it needs to be escaped, so `\]`
+3. `[^\x1b]*` matches anything except `ESC` unlimited times, meaning we seek forward until we reach the `ESC`
+4. `ESC\` (`\x1b\\`) then we match the `ESC\` which acts as OSCs temrinator
+
+> [!NOTE]
+> I'm explicitly matching non-`ESC` symbols in 3. instead of just matching everything inbetween lazily (`.*?`) because sed doesn't support lazy matching.
+> I could of course use pearl but why bother if this works.
+
+Effectively this would match everything starting with `ESC]`, ending with `ESC\` as well as everything between it. So we confiure kitty to remove every match using sed after copying to the clipboard:
+
+```shell title="~/.config/kitty/kitty.conf"
+# Disable clipboard
+clipboard_control write-clipboard read-clipboard
+# Define the regex and change the clipboard
+env REGEX=\x1b\][^\x1b]*\x1b\\
+map ctrl+shift+c combine :
+               \ copy_ansi_to_clipboard :
+               \ launch sh -c
+                    \ 'kitten clipboard --get-clipboard |
+                    \ sed -e "s|${REGEX}||g" |
+                    \ kitten clipboard'
+```
+
+**What's happening here:**
+
+`combine :` allows us to execute multiple [kitty actions](https://sw.kovidgoyal.net/kitty/actions/) seperated by a colon (`:`).
+
+We execute `copy_ansi_to_clipboard` first, then execute the launch action, which runs a command.
+
+We run a new shell which first uses kitty's [clipboard kitten](https://sw.kovidgoyal.net/kitty/kittens/clipboard/) to fetch the system clipboard. 
+[Kittens](https://sw.kovidgoyal.net/kitty/kittens_intro/) are python scripts for interaction with kitty, they are system agnostic and if someone uses kitty we know that they can use kittens!
+
+So pipe the clipboard contents into `sed -e` executing the following expression. Here is a breakdown:
+- `s`: substitute
+- `|`: is our chosen delimiter
+- `${REGEX}`: is what were matching
+- `||` two delimiters in between is what were replacing with (in this case noting)
+- `g` globally, meaning replace every occurence, not just the first
+
+So yeah, essentially just replacing every occurence of our regex with nothing.
+Finally we use the clipboard kitten again to write sed's ouptut to the system clipboard again.
+
+And that's it. *Now* i can copy my terminal ouptut and paste it into my codeblock. 
+
+```ansi
+[92mgelaechter[39m@Arch [32m~/D/Test[39m> ls [36m--color
+[22;1;34mdir1[22;39m  [22;1;34mdir2[22;39m  file1  file2[m
+```
+
+## Conclusion
+
+Quite a lot of extra work, but we learned about ANSI escape codes.
+Oh and also the main reason for doing this: This has great benifits for typesetting!
+
+Compared to screenshots we get actual selectable, copiable text that is rendered by your browser.
+Since Shiki is now interpreting the color codes it can also change its colors dynamically. For example when changing to dark mode.
+
+
+
+[^1]: My blog additionally uses [Expressive Code](https://expressive-code.com/) to make the codeblocks a little nicer than what base Astro provides.
+[^2]: The reason for deactivating previous boldness in every escape code is probably a decision made in the implementation of `ls` to ensure a clean start state.

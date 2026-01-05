@@ -23,6 +23,7 @@
     "@waline/client": "^3.8.0",
     "astro": "^5.16.6",
     "astro-compress": "^2.3.8",
+    "astro-expressive-code": "^0.41.5",
     "astro-og-canvas": "^0.7.2",
     "canvaskit-wasm": "^0.40.0",
     "feed": "^5.1.0",

@@ -124,6 +124,7 @@ const pageImage = postSlug
   function initTheme(doc = document) {
     const isDark = isCurrentDark()
     doc.documentElement.classList.toggle('dark', isDark)
+    doc.documentElement.setAttribute("data-theme", isDark ? "github-dark" : "github-light");
 
     // Update meta theme-color tag
     const metaThemeColor = doc.head.querySelector('meta[name="theme-color"]')

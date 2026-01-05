@@ -2,6 +2,7 @@ import mdx from '@astrojs/mdx'
 import partytown from '@astrojs/partytown'
 import sitemap from '@astrojs/sitemap'
 import Compress from 'astro-compress'
+import expressiveCode from 'astro-expressive-code';
 import { defineConfig } from 'astro/config'
 import rehypeKatex from 'rehype-katex'
 import rehypeMermaid from 'rehype-mermaid'
@@ -11,8 +12,7 @@ import remarkMath from 'remark-math'
 import UnoCSS from 'unocss/astro'
 import { base, defaultLocale, themeConfig } from './src/config'
 import { langMap } from './src/i18n/config'
-import { rehypeCodeCopyButton } from './src/plugins/rehype-code-copy-button.mjs'
-import { rehypeExternalLinks } from './src/plugins/rehype-external-links.mjs'
+// import { rehypeExternalLinks } from './src/plugins/rehype-external-links.mjs'
 import { rehypeHeadingAnchor } from './src/plugins/rehype-heading-anchor.mjs'
 import { rehypeImageProcessor } from './src/plugins/rehype-image-processor.mjs'
 import { remarkContainerDirectives } from './src/plugins/remark-container-directives.mjs'
@@ -41,25 +41,24 @@ export default defineConfig({
     })),
     defaultLocale,
   },
-  integrations: [
-    UnoCSS({
-      injectReset: true,
-    }),
-    mdx(),
-    partytown({
-      config: {
-        forward: ['dataLayer.push', 'gtag'],
+  integrations: [UnoCSS({
+    injectReset: true,
+  }),
+    expressiveCode({
+      styleOverrides: {
+        codeFontFamily: "Literation Mono Nerd Font"
       },
-    }),
-    sitemap(),
-    Compress({
-      CSS: true,
-      HTML: true,
-      Image: false,
-      JavaScript: true,
-      SVG: false,
-    }),
-  ],
+    }), mdx(), partytown({
+    config: {
+      forward: ['dataLayer.push', 'gtag'],
+    },
+  }), sitemap(), Compress({
+    CSS: true,
+    HTML: true,
+    Image: false,
+    JavaScript: true,
+    SVG: false,
+  })],
   markdown: {
     remarkPlugins: [
       remarkDirective,
@@ -74,8 +73,7 @@ export default defineConfig({
       rehypeSlug,
       rehypeHeadingAnchor,
       rehypeImageProcessor,
-      rehypeExternalLinks,
-      rehypeCodeCopyButton,
+      // rehypeExternalLinks,
     ],
     syntaxHighlight: {
       type: 'shiki',
