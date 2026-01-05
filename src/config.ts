@@ -8,13 +8,13 @@ export const themeConfig: ThemeConfig = {
     // site subtitle
     subtitle: `[gəˈlɛçtɐ] das (fortwährende) laute Lachen`,
     // site description
-    description: 'This is my blog where i put whatever i feel like writing. It serves mainly as an excercise in writing.',
+    description: 'This is my blog where i put whatever i feel like writing.',
     // use i18n title/subtitle/description from src/i18n/ui.ts instead of static ones above
     i18nTitle: false, // true | false
     // author name
     author: 'Gelaechter',
     // site url
-    url: 'https://retypeset.radishzz.cc',
+    url: 'https://gelaechter.github.io',
     // base path
     // root directory for all pages and assets
     base: '/', // e.g., '/blog', '/docs'
