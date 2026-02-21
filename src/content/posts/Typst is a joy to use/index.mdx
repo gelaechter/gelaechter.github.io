@@ -1,6 +1,7 @@
 ---
 title: Typst is a joy to use
 published: 2026-01-18
+updated: 2026-02-21
 draft: false
 lang: 'en'
 tags:
@@ -20,7 +21,7 @@ description: In this post I mostly compare Typst to LaTeX and explain why to me 
 Recently while fiddling with [Tectonic](https://tectonic-typesetting.github.io/en-US/),
 a "self-contained TeX / LaTeX engine", Typst popped into my head.
 
-Typst is a typesetter like TeX / LaTeX that went open source back in March 2023. I remember reading about it
+Typst is a typesetter like TeX / LaTeX that went open source back in March 2023. I remembered reading about it
 circa 2 years ago. It had a lot of missing features and problems, so I told myself I'll take a look again
 somewhen in the future. I decided that time was now, so I set aside Tectonic and LaTeX for
 the time being and went to the Typst Website.
@@ -40,7 +41,8 @@ To anyone who has ever dealt with large LaTeX documents (80+ pages) this is a hu
 Instead of waiting minutes until I can see the changes made to my document in rendered form,
 I'd be waiting seconds at worst.
 
-This got me hooked in an instant. And so I decided to convert an old paper from LaTeX to learn about Typst.
+This got me hooked in an instant. And so I decided to convert an old paper from LaTeX.
+This way i would learn about Typsts and it quirks and get a feeling for how "production ready" it is.
 Following are the original and the converted title page (redacted, of course).
 
 :::fold[Can you guess which one was produced by which typesetter?]
@@ -51,7 +53,8 @@ The left one was done using LaTeX, the right one using Typst.
 |---|---|
 |![](title_latex.png) |![](title_typst.png)|
 
-Here are things I liked about Typst and the reasons why I think Typst is the future.
+I was very impressed with Typst. So much so, that I now personally believe that Typst is the future of Typesetting.
+The reasons for that I will now outline in this blog post.
 
 ## Recompilation
 
@@ -60,32 +63,37 @@ This is in my opinion **the discerning feature of Typst**.
 If you care about nothing else in this blog post then at least try Typst because of this.
 
 The following is a loop I personally experience quite often:
-  - Tweak a parameter
+  - tweak something in the document
   - wait for compilation
   - see it's not quite right and try again.
 
 Using LaTeX or Typst can be the difference between 5 iterations taking 5 seconds or 2 minutes.
+It lets me iterate a lot faster, so that I can now spend more time actually writing than fiddling with minute details of my document.
 
-And when using online collaborative editing and sufficiently large or complex documents this can stop being
+Also, when using online collaborative editing and sufficiently large or complex documents, compilation can stop being
 an "oh no, I have to wait" problem and start becoming an "oh no, I'll have to upgrade my account problem":
 
 ![](compile_timeout.png)
 
 Of course, you can just run the compilation and everything offline on your computer.
 And of course when working with LaTeX for long enough you'll learn about things like pre-compilation
-and splitting documents into multiple files which can then be excluded for compilation.
+or splitting documents into multiple files which can then be excluded from compilation.
 
-But when using Typst *you don't have to*! If your document compiles (Typst requires your document to be correct)
+But when using Typst *you don't have to*! *If* your document compiles (Typst requires your document to be syntactically correct)
 it does so **FAST**.
 
 ## Typst uses Markdown like markup
 
-Typst markup uses a lot of Ideas from markup languages like Markdown.
-This makes writing Typst a lot faster since the syntax tends to be a lot less verbose and more human-readable.
+The next big difference I noticed while converting my document is the difference in markup.
+Typst markup uses a lot of ideas from markup languages like Markdown.
+For comparison in LaTeX everything is pretty much a macro (that's just the nature of LaTeX).
+
+This in my opinion, makes writing Typst a lot faster, since the syntax tends to be a lot less verbose and more human-readable.
+In the following I'll compare some of this markup to LaTeX.
 
 ### Headings:
 
-If I want to write headings of different depths then we use a prefix-style heading markup.
+If we want to write headings of different depths then we use a prefix-style heading markup.
 This is essentially what markdown does too.
 Instead of using number signs (`#`), like we are used to from Markdown, we use equal signs (`=`) instead:
 
@@ -98,7 +106,7 @@ Instead of using number signs (`#`), like we are used to from Markdown, we use e
 ```
 
 I want a heading of depth three? Just put three equal signs in front of it.
-If we compare that to the LaTeX header macros the Typst variant is a lot easier:
+If we compare that to the LaTeX header macros the Typst variant is a lot simpler to grasp:
 
 ```latex
 \part{Heading 1} % Depending on document type
@@ -110,14 +118,13 @@ If we compare that to the LaTeX header macros the Typst variant is a lot easier:
 
 We don't have to remember the heading names and don't have to worry if we use parts and chapters or not.
 
-But the Typst macros *are more explicit*,
-in that when we use `\part` we are explicitly splitting our document into parts.
-Whereas every heading in Typst is a "section" and by default referred to as such.
+The LaTeX macros *are more explicit* though, in that when we use `\part` we are explicitly splitting our document into parts.
+Every heading in Typst is a "section" and by default referred to as such.
 
 ### bold, italic and monospaced text:
 
-Bold, italic and monospaced also heavily borrows from Markdown.
-Unlike Markdown italic and bold markers (`_` and `*`) are not used interchangeably.
+Bold, italic and monospaced text also heavily borrows from Markdown.
+The main difference being that the italic and bold markers (`_` and `*`) cannot be used interchangeably in Typst.
 
 ```typst
 _This will be italic_
@@ -133,20 +140,16 @@ If we compare that to LaTeX we see that we have use macros again.
 \texttt{This will be monospaced}
 ```
 
-From a historical standpoint it probably makes sense to have explicit names
-for these text modifiers that tell us what they do.
-Though in the age of context aware editors, we don't have to think
-actively think about their meaning since our editors
-can display the text as formatted, allowing us to see their meaning at a glance.
+One could argue that the macro names `textit`, `textbf` `texttt` are easier to understand since they explicitly tell you what they mean.
+Though in the age of language aware editors, I don't think this still is a big problem. 
+Your editor can display the text as it is formatted, allowing us to understand the markups meaning at a glance.
 
-And now that we don't need these explicit names anymore, they often just register as noise when reading.
-Compare the readability of text we would nest some of these modifiers:
+This way we don't need explicit names anymore. They might even register as noise when reading.
+Compare the readability of some the LaTeX/Typst source when we nest some of these modifiers:
 
 ```latex
 \texttt{Hello}, I am a \textit{sentence that uses \textbf{nested} macros}.
 ```
-
-That is way less of a problem with Typst:
 
 ```typst
 `Hello`, I am a _sentence that uses *nested* macros_.
@@ -162,7 +165,7 @@ Here is my blog: https://gelaechter.github.io/
 ```
 
 No, I didn't forget any special syntax, *Typst just doesn't need any*. It detects links on its own.
-LaTeX is the total opposite, it doesn't even support clickable links until you use the `hyperref` package.
+LaTeX is quite the opposite. It doesn't support clickable links at all util you use the `hyperref` package.
 Then you have to use a macro again:
 
 ```latex
@@ -178,7 +181,7 @@ This problem is only amplified with environment macros:
 ### Code snippets:
 
 A code snippet in Typst uses Markdown syntax.
-Three backticks and the language to start it and three backticks to end it, pretty straight forward:
+Three backticks and a language specifier to start the code block and three backticks to end it:
 
 ``````typst
 ```python
@@ -186,8 +189,10 @@ print("Hello World!")
 ```
 ``````
 
-LaTeX in comparison again requires the use of a package,
-and the use of an environment which starts with a `\begin` and ends with an `\end`.
+Pretty straight forward (if you know markdown that is).
+
+LaTeX in comparison firstly again requires the use of a package,
+and secondly the use of an environment which starts with a `\begin` and ends with an `\end`.
 In the following they mark the "minted" environment which highlights code:
 
 ```latex
@@ -197,8 +202,8 @@ print("Hello World!")
 \end{minted}
 ```
 
-In this case a single environment takes only little effort and makes for still very legible source code.
-When comparing the List syntax though, this can get out of hand quickly:
+In this case a single environment takes only little effort and makes for pretty legible source code.
+When comparing the list/enumeration syntax though, this can get out of hand quickly:
 
 ### Lists
 
@@ -215,8 +220,6 @@ To recreate these two lists:
 2. Item 2
 
 This, is what we have to do in LaTeX:
-
-
 
 ```latex
 \begin{itemize} % Unordered
@@ -268,9 +271,9 @@ I now want to talk about Typsts included features.
 It means that Python has many of the modules that you could need already included 
 in the language itself.
 
-When compared to LaTeX then Typst feels similar.
+When compared to LaTeX, Typst feels similar.
 Again, this is because Typst was designed with years of LaTeX usage in mind.
-The Typst developers know what we expect of a typesetter, while LaTeX had to grow organically.
+The Typst developers know what we expect of a typesetter, while LaTeX had to grow "organically".
 
 Here are some LaTeX packages I'd include in a typical document:
 
@@ -280,16 +283,18 @@ Here are some LaTeX packages I'd include in a typical document:
 - *csquotes* to support smart quotation marks (`" "` to `“ ”`)
 - *fontenc* to encode symbols like ö or á as a single character that our font can then look up.
 - *geometry* to set page size and margins
-- *float* to position figures and similar where they actually are in the LaTeX source.
+- *float* to position figures and the like equivalent to where they are in the LaTeX source.
 
 And these are just a few select. My original LaTeX document uses *31 packages*.
 For my Typst conversion of the document I didn't use a single one **because Typst already includes these features**.
 
-An important, side effect that this has is that you don't need to decide on which solution to choose
-when you need some functionality. Especially since LaTeX has such a long history there are a bunch of packages,
-often superseding another. So you end up in situations like:
+An important side effect of this is that you don't need to decide on which solution to choose when you need some functionality.
+This can be especially cumbersome since LaTeX has such a long history.
+For every problem you have there are about a dozen packages promising a solution, often superseding another.
+So you end up in situations like:
 
-*I need to create a table, do I use*
+*I need to create a table, which package (if any) should I use?*
+
  - the built-in *tabular* environment?
  - the *tabularx* package?
  - the newer *tabulary* package?
@@ -299,14 +304,14 @@ often superseding another. So you end up in situations like:
 
 And I'm sure that someone somewhere will tell me that all of these are actually wrong,
 and I should be using *multilongtabulararrayxyz* instead because that is the package
-[that solves all problems](https://xkcd.com/927/).
+[works for all my use cases](https://xkcd.com/927/).
 
 So by just giving you the tools you need, Typst saves a lot of your time otherwise spent
-reading old TeX Stack Exchange posts about all possible solutions to your problem.
+reading old TeX Stack Exchange posts about possible solutions to your problem.
 
 > [!TIP]
 > By the way, Typst of course still offers packages through the "[Typst Universe](https://typst.app/universe)",
-when basic Typst isn't enough.
+for whenever basic Typst isn't enough.
 
 {/*
 ## Typst.app
@@ -372,19 +377,20 @@ Now there are two more things i never knew i missed in Overleaf as an editor.
 This might be a good or a bad thing depending on what you like but the way you do mathematical notation
 in Typst feels very implicit when compared to LaTeX, meaning it is often less verbose and faster to type.
 
-Let's image you want to note a fraction such as this:
+Let's imagine you want to create a fraction such as this:
 
 $$
 \frac{1}{2}
 $$
 
-LaTeX makes no assumptions. If you want a fraction you have to *tell it that* using the `\frac` macro.
+LaTeX makes no assumptions. If you want a fraction you have to *tell* LaTeX using the `\frac` macro.
 
 Typst however goes the other way around simply allows you to write `1/2`,
 like I would in a plain text file for example.
+
 Typst's mathematical syntax makes these kinds of assumptions what a user usually wants to do.
 And since in math fractions are used more often than a slash-notation ($1/2$)
-the math syntax makes the slash an explicit choice by escaping it (`1\/2`).
+the math syntax makes the slash the explicit choice by escaping it (`1\/2`).
 
 This is a pattern that continues through Typst's math syntax. `1^22` actually renders $1^{22}$,
 while in LaTeX we'd have to explicit state that the second `2` also belongs into the exponent
@@ -400,7 +406,8 @@ Here are some more example expressions:
 |$$\pi \in \mathbb{R}$$|`\pi \in \mathbb{R}`|`pi in RR`|
 |$$\text{Split} \cdot \text{Words}$$|`\text{Split} \cdot \text{Words}`|`"Split" dot "Words"`
 
-And these simplifications get more weight the more we try to note:
+And these simplifications become more important the more we try to denote.
+If we want to write a matrix like this:
 $$
 \begin{pmatrix}
 1 & 2 & \ldots & 10 \\
@@ -409,6 +416,8 @@ $$
 10 & 10 & \ldots & 10
 \end{pmatrix}
 $$
+
+In LaTeX we do the following.
 
 ```latex
 $$
@@ -421,41 +430,42 @@ $$
 $$
 ```
 
+The Typst equivalent looks like this:
+
 ```typst
 $ mat(
-  1, 2, ..., 10;
-  2, 2, ..., 10;
+  1, 2, dots, 10;
+  2, 2, dots, 10;
   dots.v, dots.v, dots.down, dots.v;
-  10, 10, ..., 10;
+  10, 10, dots, 10;
 ) $
 ```
 
-But don't worry, if you don't have time to get used to new mathematical notaions,
-just [keep using LaTeX math in Typst](https://typst.app/universe/package/mitex), with all the other benifits that Typst brings you.
+But don't worry, if you don't have time to get used to, or simply dislike, the new math syntax.
+You can [keep using LaTeX math in Typst](https://typst.app/universe/package/mitex), with all the other benifits that Typst brings you.
 
 ## Typst is a programming language
 
-Finally i want to talk about another big selling point for me personally.
+Finally I want to talk about another big selling point for me personally.
 
 Unlike LaTeX which is system of macros built on top of TeX, Typst contains what is essentially a functional programming language.
 For me with a programming background this is very interesting.
-And considering that a sizeable chunk of LaTeX users are
-computer scientists i believe this to be of interest for many others.
+And considering that a sizeable chunk of LaTeX users are computer scientists, I believe this to be of interest for many others.
 
 > [!WARNING]
-> Programming ramblings ahead. If you don't care about programming then feel free skip to the [conclusion](#conclusion)
+> Programmer ramblings ahead. If you don't care about programming, feel free skip to the [conclusion](#conclusion)
 
 **Everything in Typst is data.** Booleans, Bytes, Floats, Integers, Functions, Strings or Content.
 Pretty much everything in Typst is represented by a type which we can store in **variables**
 and manipulate through **functions**. This is a clear difference to LaTeX, which treats everything
-as a *token* and makes changes to these using macros which are expanded into more tokens.
+as a *token* and makes changes to these using macros which are expanded into more tokens (or macros).
 
-**Typst also supports structuring this data.** There are most notably arrays and dictionaries.
+**Typst also supports structuring this data.** There are arrays and dictionaries.
 Arrays being a list of data. And dictionaries being structured data where a key stores a value
 (like I would look up the translation (value) for a word (key) in a dictionary).
 
 This means I can create a variable `authors` where an author is a dictionary containing
-a name, a student ID, and their signature (`image` is a function which returns `content`,
+a name, a student ID, and their signature (`image` is a function which returns `content`;
 the content being a rendered image for the given path).
 
 ```typst
@@ -475,7 +485,9 @@ the content being a rendered image for the given path).
 ```
 
 **Typst provides functions for working with this data.**
-Do you want to extract the first name of an author? You can take the full name and split it at the whitespace to get an array of two strings. Then you just have to pick the first:
+Do you want to extract the first name of an author?
+You can take the full name and split it at the whitespace to get an array of two strings.
+Then you just have to pick the first entry of your array:
 ```typst
 #let frodo = (
     name: "Frodo Baggins",
@@ -490,7 +502,8 @@ Do you want to extract the first name of an author? You can take the full name a
 ```
 
 **Typst lets you create functions yourself.**
-This lets you repeat actions by behavior as often as you like.
+This lets you repeat actions  or behavior as often as you like.
+Do you often need the first name of an author? Just create a function:
 
 ```typst
 #let first_name(author) = {
@@ -502,18 +515,21 @@ This lets you repeat actions by behavior as often as you like.
 // This assumes we also created a "samwise" variable somewhere
 ```
 
-Now since Typst treats document content as a type too we can construct content programmatically. We can take our list `autoren`, use kuerzel on each of the entries using the `map` function meaning we now
+Now since Typst treats document content as a type too, we can construct content programmatically.
+We can take our `authors` list, and apply our `first_name` function to each of the entries using the built-in `map` function.
+This way our list of authors becomes a list of first names.
 
 ```typst
 // Map transforms each entry of a list using a function and then returns a new list
-#let names = #authors.map(first_name) // names is now an array ("Frodo", "Samwise")
+#let first_names = #authors.map(first_name) // first_names is now an array ("Frodo", "Samwise")
 // join "joins" a list using a chosen separator and returns Content
-#names.join(" ") // This renders in the document as `Frodo Samwise`
+#first_names.join(", ") // This renders in the document as `Frodo, Samwise`
 ```
 
 ### Programmatic processing of content
 
-If you are a programmer familiar with functional programming this allows you to do a lot of cool things in your documents.
+If you are familiar with functional programming you know about these concepts I just talked about.
+And since you can use all this functionality to *process document content*. This allows you to do a lot of cool things in your documents.
 
 You can for example create a 10x10 matrix going from 1 to 100 programmatically instead of by hand:
 
@@ -540,9 +556,7 @@ $$
 \end{pmatrix}
 $$
 
-Of course in the age of AI this is less useful than it once was (*"Claude, generate a 10x10 matrix in LaTeX"*),
-but that is of course not all that we can do.
-
+This is a somewhat simplistic party trick, but that is of course not all that we can do.
 I wrote this function for example, that renders python comments as Typst markup:
 
 ```typst
@@ -563,7 +577,7 @@ I wrote this function for example, that renders python comments as Typst markup:
 }
 ```
 
-So i put some Typst markup into the comments of my python code, wrap it in a code block and put into the function:
+So I put some Typst markup into the comments of my python code, wrap it in a code block and put into the function:
 ``````typst
 #ap(```py
 # 3: for $e_scr(I)$ in $bb(F)_2^k$ mit $w t(e_scr(I)) = i$ do
@@ -582,10 +596,12 @@ Et voilà, Typst renders our python comments as Markup:
 ![](typsthon.png)
 
 There is probably a way to do this in LaTeX but definitely
-not in half an hour by someone new to LaTeX and all its quirks
+not in half an hour by someone new to LaTeX and all its quirks.
 (I had about 4 hours of Typst experience at this point).
 
-And if you are now curious about what other kinds of crazy things you can do; Check out the
+Though granted I am pretty familiar with functional programming and programming in general.
+
+If you are now curious about what other kinds of things Typst lets you do, check out the
 ["fun" category in the Typst Universe](https://typst.app/universe/search/?category=fun).
 You'll find stuff like:
   - [Brainfuck transpilers](https://typst.app/universe/package/brain-transplant)
@@ -596,7 +612,7 @@ All inside Typst which, let me remind you, is a typesetter...
 
 ## Conclusion
 
-If after reading all of this you get the feeling that I dislike LaTeX, 
+If while reading this you got the feeling that I dislike LaTeX, 
 then that is only because I enjoy Typst so much!
 
 I am hugely grateful for the years of sweat and love that people all over the world have put into LaTeX.

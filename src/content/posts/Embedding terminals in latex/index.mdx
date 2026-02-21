@@ -1,0 +1,126 @@
+---
+title: Embedding terminals in LaTeX
+published: 2026-02-21
+draft: true
+lang: 'en'
+tags:
+  - Linux
+  - Typesetting
+description: In this post I describe how we can use PDFs as a way to embed colorful terminal-output inside LaTeX documents.
+---
+
+import test_pdf from "./Test.pdf"
+import screencast from "./Screencast_20260220_215357.webm"
+
+Recently I've written about [embedding terminals on the web](/posts/embedding-terminals-on-the-web).
+This is the equivalent post for embedding colorful terminal output in LaTeX.
+
+And we're going to achieve this by exporting our terminal as a PDF!
+
+## PDFs
+
+*"Why a PDF in the first place?"*, you might ask.
+
+Well... the answer is that LaTeX has no way of parsing the ANSI codes that tell your Terminal
+what colors to use[^2]. This means that LaTeX cannot render the terminal itself[^1].
+So usually when embedding terminals we just use screenshots, but these have multiple drawbacks compared to PDFs:
+
+- They are more annoying to capture if your terminal doesn't allow exporting them.
+- They are limited in resolution
+- The text is not selectable, since it's not really text.
+- They are usually larger than PDFs
+
+Essentially PDFs are in every way better than screenshots and seem to be the best solution that
+I could find to embed terminals in LaTeX.
+
+In practice a document defined like this:
+
+```latex
+\documentclass{scrartcl}
+\usepackage{minted}
+\usepackage{graphicx}
+
+\begin{document}
+
+What follows is a beautiful terminal embed:
+
+\begin{listing}[!ht]
+    \centering
+    \includegraphics[width=1\linewidth]{neofetch.pdf}
+    \caption{The neofetch command, ran in a terminal}
+    \label{lst:neofetch}
+\end{listing}
+
+\end{document}
+```
+
+Will render this document:
+
+<embed src={test_pdf} width="500" height="375" class="w-full mb-5"
+ type="application/pdf">
+</embed>
+
+**Accurate colors and selectable text!**
+Now the only thing we have to do is reduce the friction, meaning the PDF exporting workflow, so much that it is easier than taking a screenshot.
+
+## PDF-Kitten
+
+In this part I would originally talk about the shell-script I've written which takes HTML
+produced by [Konsole](https://apps.kde.org/konsole/) and converts it into a nice embeddable PDF.
+
+But while tinkering with [Kitty](https://github.com/kovidgoyal/kitty) (an extensible terminal emulator) for the web terminals post, I've learned about its capabilities
+and thought I can do one better. So I created a
+[*kitten*](https://sw.kovidgoyal.net/kitty/kittens_intro/#kittens) (an extension for kitty)
+that allows you to export a clean PDF from your terminal output.
+
+Here is what it does:
+  1. It copies your terminal selection including the ANSI codes.
+  2. It then opens that in the editor of your choice so you can make edits. \
+      *This is useful for things like redacting information.*
+  3. It converts the edited output into a nicely cropped PDF.
+  4. It finally opens that PDF with your default application.
+
+I named this little extension "PDF-Kitten". Pretty creative, I know 🐱.
+
+### What this looks like
+
+I made a screen recording that shows what this work-flow looks like for me in practice.
+
+<video src={screencast} controls class="w-full mb-5">
+</video>
+
+In this case my configured editor is [micro](https://github.com/micro-editor/micro), and my PDF viewer is [Okular](https://okular.kde.org/).
+You can change this to whatever you want though.
+
+### How this works
+
+> [!TIP]
+> If you don't care about the how, check out the [Git repository](https://github.com/gelaechter/pdf-kitten) to try it for yourself.
+
+Kitty kittens are really just Python scripts. When I press the key <kbd>F11</kbd>, which I mapped to PDF-Kitten a Python script is called.
+
+  1. It uses the Kitty API to get your current selection including the ANSI codes.
+  2. It cleans the [OSCs that gave me grief in the web terminal post](https://gelaechter.github.io/posts/embedding-terminals-on-the-web/#what-my-fish-shell-is-producing).
+  3. It uses the Kitty API to open the output in the configured editor.
+  4. When the editor closes it converts the output to HTML using [ansi2html](https://github.com/pycontribs/ansi2html).
+  5. It fetches Kitty's currently configured colors and font and applies them to the generated HTML.
+  6. It uses [weasyprint](https://weasyprint.org/) to produce a PDF from the HTML.
+  7. It crops that PDF to the height of the output using [pdfCropMargins](https://pypi.org/project/pdfCropMargins/). \
+    *The width is fixed using full-width embedding in LaTeX produces consistent results.*
+  8. Finally, it uses the Kitty API to open the cropped PDF.
+
+It's honestly really impressive how extensible Kitty is. It even provides us with a lot 
+of helper APIs to interact with the OS.
+
+And also as someone who kind of disliked Python for its nightmarish package management[^3] and its
+indentation model I found a new appreciation for it. There really is a Python library for everything.
+
+## Installation
+
+If you want to now try PDF-Kitten you can check out [its Git repository on GitHub](https://github.com/gelaechter/pdf-kitten).
+The installation and usage is explained in the README.
+
+[^1]: LuaLaTeX technically can, but that way you would be restricted to use that compiler and
+     **that** compiler only.
+[^2]: [My post on web-terminals](/posts/embedding-terminals-on-the-web) goes into a lot more detail about ANSI codes and how they work.
+[^3]: These days this problem is largely solved; All hail [uv](https://docs.astral.sh/uv/)!
