@@ -201,4 +201,15 @@ const pageImage = postSlug
     data-website-id={umamiAnalyticsID}
   />
 )}
+
+<!-- Fix Firefox video MIME issues: https://github.com/withastro/astro/issues/13477 -->
+  <script>
+    document.addEventListener("astro:after-swap", () =>
+      document.querySelectorAll("video").forEach(
+        (v) =>
+          // eslint-disable-next-line no-self-assign
+          v.closest("[data-astro-transition-persist]") || (v.src = v.src),
+      ),
+    );
+  </script>
 </head>
