@@ -1,0 +1,42 @@
+---
+title: Understanding the Bleichenbacher's padding oracle attack.
+published: 2026-01-18
+draft: true
+lang: 'en'
+tags:
+  - Cryptography
+description: In this post I explain the Bleichenbacher's padding oracle attack.
+---
+
+Bleichenbacher's padding oracle attack is an attack that originally targeted SSLv3.
+
+It makes use of three properties:
+  - The padding scheme of PKCS \#1 v1.5
+  - the homomorphism of RSA
+  - the padding oracle and the information it leaks
+
+## Why bother with an attack from 1998? 
+{/* TODO: */}
+
+- Still relevant: https://ieeexplore.ieee.org/document/8835216 (2019)
+- Nice example of an oracle attack
+-
+
+
+## Padding in PKCS \#1 v1.5
+
+Since SSLv3 encrypts all messages $M$ using RSA, the messages can be no longer than the
+Modulus $N$[^1]. To extend shorter messages to this length SSLv3 used the padding as defined
+in PKCS \#1 v1.5. An SSLv3 block starts with the padding.
+
+The padding starts with `0x002` then follows $\text{len}(M) -3$ random non-0 bytes and finally
+another 0 byte.
+
+
+## RSA is homomorph
+
+## What this tells us for the future
+  - Oracles are a real threat
+  - 
+
+[^1]: I'll assume an understanding of RSA and how it works. 

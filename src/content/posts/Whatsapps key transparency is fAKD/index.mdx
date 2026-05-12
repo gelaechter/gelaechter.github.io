@@ -1,0 +1,29 @@
+---
+title: WhatsApp's key transparency is fAKD
+published: 2026-01-18
+draft: true
+lang: 'en'
+tags:
+  - Cryptography
+description: In this post I am going to talk about key transparency and how NOT to do it
+---
+
+For End-to-End-encryption to work properly the two "ends", in the case of a messenger that means two parties of a
+conversation, need to share they're public keys with each other.This is facilitated through public key infrastructure (PKI).
+In a case where a malicious actor is not a third party but the PKI itself, users will need to ensure
+they were served the correct public keys. To do this most messenger apps today provide mechanisms like verification numbers or QR codes which serve as a 
+cryptographic summary of the two parties public key.
+The parties can be compare them out-of-band to ensure everyone was served the same keys.
+
+Sadly these methods of verification are bothersome at best and comletely unreasonable for conversations
+with consisting of many users where the amount of verifications required grows binomially.
+
+# What is key transparency
+
+Key transparency is a concept that tries to replace the manual verification the keys through these methods
+with an automatic system based on cryptographic proofs.
+
+It was firstly introduced in the 2014 paper [CONIKS](https://eprint.iacr.org/2014/1004.pdf),
+which defines the goal of *key consistency*.
+
+[^1]: Verification 

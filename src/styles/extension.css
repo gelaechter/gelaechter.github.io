@@ -167,6 +167,11 @@ lite-youtube > .lty-playbtn {
 }
 
 /* Mermaid */
+pre.mermaid {
+  background-color: transparent !important;
+  border: none;
+}
+
 pre.mermaid svg {
   --at-apply: 'mx-auto';
 }

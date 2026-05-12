@@ -1,0 +1,147 @@
+---
+title: "Let's make music - 01 Pitch"
+published: 2026-01-05
+draft: true
+lang: 'en'
+tags:
+  - Music
+  - Let's make music
+description: This Post is the first entry of the Let's make music series. It covers Pitch.
+---
+
+import Score from "./Score.astro"
+import Piano from "./Piano.astro"
+
+<style>
+{`
+html.dark img.score {
+  -webkit-filter: invert(.75); /* safari 6.0 - 9.0 */
+  filter: invert(.75);
+}
+`}
+</style>
+
+Music notation allows you to read and write down music.
+Through music notation we can communicate musical ideas and concepts, so we can learn from them.
+That way we can apply these ideas ourselves and write music.
+So let's get started with the basics!
+
+> [!TIP]
+> This series will make use of a virtual Piano. **Larger screens allow you to see more keys.**
+> <Piano zoom="0.97"/>
+
+# Pitch
+
+<Score filename="first_note"/>
+
+This is a **note**. It sits on a system of five lines and four spaces that we call a **staff**.
+
+> [!TIP]
+> **Try clicking the image to hear what it sounds like!** \
+> *Musical notation is always played left to right*
+
+Notes communicate two things: **Pitch** and **duration** of a sound.
+
+We'll first discuss pitch.
+Pitch describes how low or high a sound is. Notes show their pitch through which line or space the note occupies.
+Notes on the bottom lines/spaces will sound low (or dark). Notes on the upper lines/spaces will sound high (or light).
+
+<Score filename="low_to_high"/>
+
+There are seven names we give to the pitches of notes. They are the letters *A*, *B*, *C*, *D*, *E*, *F* and *G*[^1]. We know which note on our staff is which by marking one of the lines or spaces of our staff with a so called **clef**. The example above is missing its clef. The example below has that clef added back. This clef below is called the "treble clef":
+
+<Score filename="low_to_high_with_clef"/>
+
+The inwards curling "swirl" of the treble clef marks the G note, which is why it is also called the "G clef".
+Now that we know where G is, we can find our other notes relative to it. When going up in pitch relative to our reference note we go forward in the alphabet. When going down we go backwards in the alphabet.
+
+So, our reference note, the G note, is on the second line from the bottom of our staff.
+
+<Score filename="low_to_high_with_clef_G"/>
+
+Therefore in the space below the G is the F note (we went down, so backwards in the alphabet).
+In the line below the F is the E note (again down, so backwards in the alphabet).
+
+<Score filename="low_to_high_with_clef_G_F_E"/>
+
+Since G is the last note-letter the next note in the space above the G is the A again, our letters repeat.
+After A comes B and then C and so forth... (going up, so, forward in the alphabet)
+
+<Score filename="low_to_high_with_clef_all_names"/>
+
+<script src="https://unpkg.com/roughjs@4.6.6/bundled/rough.js"></script>
+
+## Octaves
+
+Since notes keep repeating we can have multiple notes with the same letter on our staff (see those two E and F notes?).
+
+This is because there are higher and deeper variations of each note. We call these **octaves** and discern them by numbering our notes.
+
+
+> [!NOTE]
+> The term "octave" derives from the Latin word "octava" meaning "eighth" since every eighth note repeats our system of letters: \
+> *A*, B, C, D, E, F, G, *A*, B, C ...
+
+Now while these octaves are definitely different in pitch, they sound like they are part of the same sound.
+The reasons for that are complicated, but you might be able to tell they are similar by just having a listen:
+
+<Score filename="E3_to_E6"/>
+
+*In the example above we used so-called "ledger lines" to extend our staff. We can do that when we want to put notes on a staff that go beyond our lines.*
+
+The need for octaves, meaning higher and lower variations of our notes becomes especially apparent when looking at instruments with vastly different ranges.
+Like for example a piccolo (a very high kind of flute) and a tuba (a large brass instrument).
+
+<Score filename="piccolo_vs_tuba"/>
+
+Since we don't want to add too many ledger lines we use different clefs to mark different reference notes.
+The tuba in our example plays a C2. It would need eight ledger lines to be noted in the treble clef which is why we use the "bass clef" instead.
+The bass clef marks the F3 note using its thick dot part.
+
+The most commonly used clefs are the treble-, bass-, and alto clefs:
+
+<div style="
+display: flex;
+flex-direction: row;
+flex-wrap: wrap;
+gap: 3em;
+justify-content: start;
+align-items: center;
+align-content: center;
+">
+<Score filename="treble_clef"/>
+<Score filename="bass_clef"/>
+<Score filename="alto_clef"/>
+</div>
+
+Since each of these mark different reference notes the same lines of our staffs will then be different notes depending on the clef:
+
+<Score filename="clef_comparison"/>
+
+For instruments with a wide range like a piano, where we oftentimes want to play both low and high notes at the same time, we use two staves joined by a brace. We call this the **grand staff**:
+
+<Score filename="grand_staff"/>
+
+## Piano
+
+Now is a good time to introduce the Piano. The Piano is an instrument that maps one note to one key[^2].
+When the key is pressed down it produces the sound of the respective note.
+
+Here is a digital version for you to play around with.
+
+<Piano zoom="0.898" style="margin-bottom: 1.5em;"/>
+
+In this piano the C4 is at the far left. Try pressing the left most key and compare it to this:
+
+<Score filename="C4"/>
+
+The notes we learned about up to this point, the ones on lines and in the spaces are the white keys of the piano
+
+<Score filename="low_to_high_piano"/>
+
+<Piano zoom="0.898" style="margin-bottom: 1.5em;" letters="true"/>
+
+
+[^1]: Alternatively *Do*, *Re*, *Mi*, *Fa*, *So*, *La*, *Ti* also exist. In Germany they even use *A*, *H*, *C*, *D*, *E*, *F* and *G* \
+For our purposes we accept A, B, C ... G as canonical.
+[^2]: At this moment we disregard microtones.

@@ -1,0 +1,46 @@
+---
+import { Image } from "astro:assets";
+
+const audio: any = import.meta.glob("./scores/*.mp3", {
+  eager: true,
+});
+const image: any = import.meta.glob("./scores/*.svg", {
+  eager: true,
+});
+
+const { filename } = Astro.props;
+
+const audioSrc = audio[`./scores/${filename}.mp3`]?.default;
+const imageSrc = image[`./scores/${filename}.svg`]?.default;
+
+if (!imageSrc || !audioSrc) {
+  throw new Error(`Score "${filename}" does not exist`);
+}
+---
+
+<Image
+  class="score nozoom"
+  id=`img_${filename}`
+  src={imageSrc}
+  alt={filename}
+  style="cursor: pointer; max-width: 90%"
+/>
+
+<audio id=`${filename}-audio` src={audioSrc}></audio>
+
+<script define:vars={{ filename }}>
+  const img = document.getElementById(`img_${filename}`);
+
+  img?.addEventListener("click", () => {
+    // Stop others
+    const audios = document.getElementsByTagName("audio");
+    for (let i = 0; i < audios.length; i++) {
+      audios[i].pause();
+      audios[i].currentTime = 0;
+    }
+
+    // Start this one
+    const player = document.getElementById(`${filename}-audio`);
+    player?.play();
+  });
+</script>

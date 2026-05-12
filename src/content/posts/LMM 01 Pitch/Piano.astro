@@ -1,0 +1,169 @@
+---
+
+const { zoom = 1.0, letters = false, style = '' } = Astro.props
+const letter_display = letters ? 'auto' : 'none';
+---
+
+<style define:vars={{ zoom, letter_display }}>
+
+ul {
+  box-sizing: border-box;
+  overflow: hidden;
+  height: calc(9em * var(--zoom));
+  width: 100%;
+  margin: auto;
+  padding: calc(1.5em * var(--zoom)) 0 0 calc(1.5em * var(--zoom));
+  position: relative;
+  border: calc(0.5px * var(--zoom)) solid #160801;
+  border-radius: calc(0.5em * var(--zoom));
+  background:
+    linear-gradient(to bottom right, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0)),
+    black;
+  box-shadow:
+    0 0 calc(25px * var(--zoom)) rgba(0, 0, 0, 0.5) inset,
+    0 calc(0.5px * var(--zoom)) rgba(212, 152, 125, 0.2) inset,
+    0 calc(2.5px * var(--zoom)) calc(7.5px * var(--zoom)) rgba(0, 0, 0, 0.5);
+}
+
+li {
+  user-select: none;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  position: relative;
+  float: left;
+}
+
+ul .white {
+  height: calc(8em * var(--zoom));
+  width: calc(2em * var(--zoom));
+  z-index: 1;
+  border-left: calc(0.5px * var(--zoom)) solid #bbb;
+  border-bottom: calc(0.5px * var(--zoom)) solid #bbb;
+  border-radius: 0 0 calc(2.5px * var(--zoom)) calc(2.5px * var(--zoom));
+  box-shadow:
+    calc(-0.5px * var(--zoom)) 0 0 rgba(255, 255, 255, 0.8) inset,
+    0 0 calc(2.5px * var(--zoom)) #ccc inset,
+    0 0 calc(1.5px * var(--zoom)) rgba(0, 0, 0, 0.2);
+  background: linear-gradient(to bottom, #eee 0%, #fff 100%);
+}
+
+ul .white:active {
+  border-top: calc(0.5px * var(--zoom)) solid #777;
+  border-left: calc(0.5px * var(--zoom)) solid #999;
+  border-bottom: calc(0.5px * var(--zoom)) solid #999;
+  box-shadow:
+    calc(1px * var(--zoom)) 0 calc(1.5px * var(--zoom)) rgba(0, 0, 0, 0.1) inset,
+    calc(-2.5px * var(--zoom)) calc(2.5px * var(--zoom)) calc(10px * var(--zoom)) rgba(0, 0, 0, 0.2) inset,
+    0 0 calc(1.5px * var(--zoom)) rgba(0, 0, 0, 0.2);
+  background: linear-gradient(to bottom, #fff 0%, #e9e9e9 100%);
+}
+
+.black {
+  height: calc(4em * var(--zoom));
+  width: calc(1em * var(--zoom));
+  margin: 0 0 0 calc(-0.5em * var(--zoom));
+  z-index: 2;
+  border: calc(0.5px * var(--zoom)) solid #000;
+  border-radius: 0 0 calc(1.5px * var(--zoom)) calc(1.5px * var(--zoom));
+  box-shadow:
+    calc(-0.5px * var(--zoom)) calc(-0.5px * var(--zoom)) calc(1px * var(--zoom)) rgba(255, 255, 255, 0.2) inset,
+    0 calc(-2.5px * var(--zoom)) calc(1px * var(--zoom)) calc(1.5px * var(--zoom)) rgba(0, 0, 0, 0.6) inset,
+    0 calc(1px * var(--zoom)) calc(2px * var(--zoom)) rgba(0, 0, 0, 0.5);
+  background: linear-gradient(45deg, #222 0%, #555 100%);
+}
+
+.black:active {
+  box-shadow:
+    calc(-0.5px * var(--zoom)) calc(-0.5px * var(--zoom)) calc(1px * var(--zoom)) rgba(255, 255, 255, 0.2) inset,
+    0 calc(-1px * var(--zoom)) calc(1px * var(--zoom)) calc(1.5px * var(--zoom)) rgba(0, 0, 0, 0.6) inset,
+    0 calc(0.5px * var(--zoom)) calc(1px * var(--zoom)) rgba(0, 0, 0, 0.5);
+  background: linear-gradient(to right, #444 0%, #222 100%);
+}
+
+.a,
+.g,
+.f,
+.d,
+.c {
+  margin: 0 0 0 calc(-0.5em * var(--zoom));
+}
+
+ul li:first-child {
+  border-radius: calc(2.5px * var(--zoom)) 0 calc(2.5px * var(--zoom)) calc(2.5px * var(--zoom));
+}
+
+ul li:last-child {
+  border-radius: 0 calc(2.5px * var(--zoom)) calc(2.5px * var(--zoom)) calc(2.5px * var(--zoom));
+}
+
+.black > p {
+  color: #ccc;
+  font-size: calc(6pt * var(--zoom));
+}
+
+p {
+  display: var(--letter_display);
+  font-size: calc(8pt * var(--zoom));
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  text-align: center;<
+}
+
+</style>
+
+<ul class="set" style={style}>
+  {
+    [0, 1, 2, 3, 4, 5, 6, 7].map(x => x + 4).map(octave => (
+        <li class="white e"><p>C{octave}</p></li>
+        <li class="black ds"><p>C#{octave}</p></li>
+        <li class="white d"><p>D{octave}</p></li>
+        <li class="black cs"><p>D#{octave}</p></li>
+        <li class="white c"><p>E{octave}</p></li>
+        <li class="white b"><p>F{octave}</p></li>
+        <li class="black as"><p>F#{octave}</p></li>
+        <li class="white a"><p>G{octave}</p></li>
+        <li class="black gs"><p>G#{octave}</p></li>
+        <li class="white g"><p>A{octave}</p></li>
+        <li class="black fs"><p>A#{octave}</p></li>
+        <li class="white f"><p>B{octave}</p></li>
+    ))
+  }
+</ul>
+
+<script>
+import { Reverb, Soundfont2Sampler } from 'smplr'
+import { SoundFont2 } from 'soundfont2'
+import soundfont_url from './ArachnoGrand.sf2?url'
+
+let context: undefined | AudioContext
+let sampler: undefined | Soundfont2Sampler
+
+function play(note: string) {
+  sampler?.start({ note, duration: 0.4, velocity: 60 })
+}
+
+document.querySelectorAll('.set > li').forEach((note) => {
+  note.addEventListener('click', (_event) => {
+    context ??= new AudioContext()
+
+    if (sampler === undefined) { // First time setup
+      sampler = new Soundfont2Sampler(context, {
+        url: soundfont_url,
+        createSoundfont: data => new SoundFont2(data),
+      })
+
+      sampler.load.then(() => {
+        sampler?.output.addEffect('reverb', new Reverb(context!), 0.2)
+        sampler?.loadInstrument(sampler!.instrumentNames[0])?.then(() => {
+          play(`${note.textContent}`)
+        })
+      })
+    }
+
+    play(`${note.textContent}`)
+  })
+})
+</script>
