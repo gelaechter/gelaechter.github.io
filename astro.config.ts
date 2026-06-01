@@ -92,14 +92,17 @@ export default defineConfig({
       {
         name: 'prefix-font-urls-with-base',
         transform(code, id) {
-          if (!id.endsWith('src/styles/font.css')) {
+          if (!id.split('?')[0].endsWith('src/styles/font.css')) {
             return null
           }
 
-          return code.replace(/url\("\/fonts\//g, `url("${base}/fonts/`)
+          return code.replace(/url\(\s*(['"]?)\/fonts\//g, `url($1${base}/fonts/`)
         },
       },
     ],
+    build: {
+      chunkSizeWarningLimit: 600,
+    },
   },
   devToolbar: {
     enabled: false,

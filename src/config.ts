@@ -144,7 +144,7 @@ export const themeConfig: ThemeConfig = {
     umamiAnalyticsID: '',
     // follow verification
     // https://follow.is/
-    follow: {
+    folo: {
       // feed ID
       feedID: '',
       // user ID
