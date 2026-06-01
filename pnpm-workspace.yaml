@@ -1,0 +1,13 @@
+shellEmulator: true
+trustPolicy: no-downgrade
+
+packages:
+  - 'packages/*'
+
+# patchedDependencies:
+#   "@qwik.dev/partytown@0.11.2": "patches/@qwik.dev__partytown@0.11.2.patch"
+
+onlyBuiltDependencies:
+  - esbuild
+  - sharp
+  - simple-git-hooks

@@ -28,7 +28,7 @@ if (!imageSrc || !audioSrc) {
 
 <audio id=`${filename}-audio` src={audioSrc}></audio>
 
-<script define:vars={{ filename }}>
+<script define:vars={{ filename }} is:inline>
   const img = document.getElementById(`img_${filename}`);
 
   img?.addEventListener("click", () => {
