@@ -2,7 +2,7 @@ import mdx from '@astrojs/mdx'
 import partytown from '@astrojs/partytown'
 import sitemap from '@astrojs/sitemap'
 import Compress from 'astro-compress'
-import expressiveCode from 'astro-expressive-code';
+import astroExpressiveCode from 'astro-expressive-code'
 import { defineConfig } from 'astro/config'
 import rehypeKatex from 'rehype-katex'
 import rehypeMermaid from 'rehype-mermaid'
@@ -43,12 +43,7 @@ export default defineConfig({
   },
   integrations: [UnoCSS({
     injectReset: true,
-  }),
-    expressiveCode({
-      styleOverrides: {
-        codeFontFamily: "Literation Mono Nerd Font"
-      },
-    }), mdx(), partytown({
+  }), astroExpressiveCode(), mdx(), partytown({
     config: {
       forward: ['dataLayer.push', 'gtag'],
     },

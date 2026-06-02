@@ -1,11 +1,10 @@
 ---
 title: Suspicious Go Executables
 published: 2025-06-10
-draft: true
+draft: false
 lang: 'en'
-description: Hello world Go Programs get flagged by antivirus scanners. In this post I describe the process of finding the reason behind this and showing this being unwarranted.
+description: Hello world Go programs get flagged by antivirus scanners. In this post I describe the process of finding the reason behind this and showing this being unwarranted.
 tags:
-  - Go
   - Reverse Engineering
 ---
 
@@ -16,8 +15,15 @@ tags:
 `}
 </style>
 
-> [!HINT]
-> 
+> [!NOTE]
+> I never finished my analysis and hence this post. I now decided to publish it anyways, so that if anyone
+> happens to get their Go programs flagged they can stumble upon this and get a better idea why.
+>
+> :::fold[TLDR]
+> The current evidence pretty much points towards false positives.
+> There doesn't seem to be malware in the Go runtime or toolchain.
+> (Though I can't say for sure, since well... see above)
+> :::
 
 ## The issue
 
@@ -99,10 +105,10 @@ We found the following warnings of the scans especially interesting:
 
 | Warning                                                                                                                                                                                                                                       | Screenshot                                |
 | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
-| **High entropy (Meta Defender)** <br/> The executable contains sections with high entropy. This usually suggests encryption to make reverse-engineering / understanding it harder.                                                             | ![alt text](high_entropy_warning.png)     |
-| **Obfuscated Files or Information (VirusTotal)** <br/>The executable contains cryptographic-primitives like RC4 or AES. This would again suggest encryption of our binary.                                                                     | ![alt text](crypt_primitives_warning.png) |
-| **Virtual Machine detection (VirusTotal)** <br/>The executable seems to contain strings related to the detection of virtual machines. This is usually done to detect the usage of Sandboxes. This way malware doesn't trigger during analysis. | ![alt text](vm_detection_warning.png)     |
-| **Installation of a Google Updater? (VirusTotal)** <br/>The executable seems to drop files inside the Google Updater directory. This suggests that malware is installed.                                                                       | ![alt text](files_dropped_warning.png)    |
+| **High entropy (Meta Defender)** <br/> The executable contains sections with high entropy. This usually suggests encryption to make reverse-engineering / understanding it harder.                                                             | ![](high_entropy_warning.png)     |
+| **Obfuscated Files or Information (VirusTotal)** <br/>The executable contains cryptographic-primitives like RC4 or AES. This would again suggest encryption of our binary.                                                                     | ![](crypt_primitives_warning.png) |
+| **Virtual Machine detection (VirusTotal)** <br/>The executable seems to contain strings related to the detection of virtual machines. This is usually done to detect the usage of Sandboxes. This way malware doesn't trigger during analysis. | ![](vm_detection_warning.png)     |
+| **Installation of a Google Updater? (VirusTotal)** <br/>The executable seems to drop files inside the Google Updater directory. This suggests that malware is installed.                                                                       | ![](files_dropped_warning.png)    |
 
 In the following chapters we are going to have a look at these warnings and their cause:
 
@@ -115,10 +121,10 @@ The first warning are high entropy sections in the executable, which often sugge
 The first thing we can do is simply compare the entropy of our Windows/Linux executables. Maybe our Linux executable doesn't contain any of these sections since it didn't raise any flags. To do that we use the [ImHex hex editor](https://github.com/WerWolv/ImHex) which provides tools for reverse engineering. The *Data Information* View for example can visualize the Shannon entropy of our binary.
 
 This graph shows the entropy of our **Windows executable**:
-![alt text](windows_executable_entropy.png)
+![](windows_executable_entropy.png)
 
 This graph shows the entropy of our **Linux executable**:
-![alt text](linux_executable_entropy.png)
+![](linux_executable_entropy.png)
 
 We immediately see that both of our binaries have sections of high entropy distributed in the same manner. So the existence of high entropy sections is not exclusive to the Windows executable. It simply appears to not be deemed dangerous for the Linux executable.
 
@@ -136,14 +142,14 @@ We can use the pattern analysis system of ImHex to find these sections in our bi
 To do that we first load the `Microsoft PE Portable Executable` pattern in the *Pattern Editor* view and the start the pattern evaluation.
 
 We are now shown information in the *Pattern Data* view:
-![alt text](pattern_data_view.png)
+![](pattern_data_view.png)
 
 Upon closer inspection we see that all our marked sections `/19`, `/32`, `/65`, `/78`, `/90` start with the ASCII symbols `ZLIB`. Meaning these sections are probably ZLIB compressed data which would explain the high entropy.
 Looking past the first 12 Bytes we can see a ZLIB magic header `0x78 0x01` which signifies low or no compression. If we use Ghidra and have a look at these sections in the *Memory Map* view we see that Ghidra has assigned our sections proper names:
 
 |                                                                                                                                     |                                                                                                                                            |
 | ----------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| ![alt text](memory_map_view.png) <br/> The memory map view. It shows us the executable sections and their respective address ranges. | ![alt text](ghidra_executable_sections.png) The image section headers of our Windows executable. We can see the actual and assigned names. |
+| ![](memory_map_view.png) <br/> The memory map view. It shows us the executable sections and their respective address ranges. | ![](ghidra_executable_sections.png) The image section headers of our Windows executable. We can see the actual and assigned names. |
 
 So our sections are actually named the following:
 
@@ -175,16 +181,16 @@ $ GOOS=windows GOARCH=amd64 go build -ldflags "-s -w" -o sans_debug.exe main.go
 ```
 
 Now we can compare our binary's entropy **with debug symbols (main.exe)**:
-![Alt text?](windows_executable_entropy.png)
+![The entropy view of the Windows executable](windows_executable_entropy.png)
 
 And **without debug symbols (sans_debug.exe)**:
-![alt text](sans_debug_entropy.png)
+![The same entropy view but without debug symbols in the executable](sans_debug_entropy.png)
 
 We see that the high entropy block starting around `0xF4...` in main.exe is missing in sans_debug.exe. If we upload sans_debug.exe into the malware scanners we see that some of the malicious-flags, have disappeared:
 
 |                                                                                                                                                                                                                                     |                                                                                                                                                                                                                                                 |
 | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ![alt text](virustotal_sans_debug.png) [The VirusTotal scan without debug symbols](https://www.virustotal.com/gui/file/247486e1367f9e59141e8eeb530ac1df4e549c0c79a2628473098397e2c13736) now shows just 6/71 instead of 9/71 flags. | ![alt text](metadefender_sans_debug.png) [The MetaDefender Cloud scan without debug symbols](https://metadefender.com/results/hash/247486E1367F9E59141E8EEB530AC1DF4E549C0C79A2628473098397E2C13736) now shows just 1/22 instead of 2/22 flags. |
+| ![The VirusTotal scan result without debug symbols](virustotal_sans_debug.png) [The VirusTotal scan without debug symbols](https://www.virustotal.com/gui/file/247486e1367f9e59141e8eeb530ac1df4e549c0c79a2628473098397e2c13736) now shows just 6/71 instead of 9/71 flags. | ![](metadefender_sans_debug.png) [The MetaDefender Cloud scan without debug symbols](https://metadefender.com/results/hash/247486E1367F9E59141E8EEB530AC1DF4E549C0C79A2628473098397E2C13736) now shows just 1/22 instead of 2/22 flags. |
 
 MetaDefender Cloud also no longer complains about suspicious entropy.
 
@@ -195,7 +201,7 @@ MetaDefender Cloud also no longer complains about suspicious entropy.
 > There are now **8/72** malicious-flags.
 >
 > :::fold[Screenshot from 06/11/2025]
-> ![alt text](virustotal_sans_debug_updated.png)
+> ![](virustotal_sans_debug_updated.png)
 >
 > We can see in the screenshot that now CrowdStrike Falcon and GData flag our executable as malicious too. I find it worrying that these test-results are seemingly not persistent. In the future I will have to take care to archive any scan-results.
 > The point however still stands. Removing debug symbols decreases malicious flag.
@@ -234,7 +240,7 @@ It contains Go's systems like garbage collection, concurrency, etc.
 Go links its runtime and all other depedencies statically into each Go executable.
 This allows Go executables to be self-contained, meaning they don't need any extra libraries to run. It just uses the given OS's functions. This also means that each Go executable contains the Go runtime pretty much in its entirety.
 
-> [!INFO]
+> [!TIP]
 >
 >We can actually inspect our executable using `ldd` to check if it links anything dynamically
 >
@@ -258,7 +264,7 @@ Now let us have a look at what is inside the Go runtime.
 Since Go is open source we can simply have a look into [Google&#39;s Go Repository](https://cs.opensource.google/go/go/+/refs/tags/go1.24.3:src/runtime/).
 The runtime is inside the `src/runtime` subdirectory:
 
-![alt text](go_repository.png)
+![](go_repository.png)
 
 Lets now clone the repository and have search for some of our crypto primitives:
 
@@ -266,7 +272,7 @@ Lets now clone the repository and have search for some of our crypto primitives:
 
 RC4 appears as part of the runtime in the [`os_darwin.go` file](https://cs.opensource.google/go/go/+/refs/tags/go1.24.3:src/runtime/os_darwin.go;l=195-199;drc=db956262ac4125693cffb517ea7aebf6ab04ec35):
 
-```go { linenos=inline, linenostart=195}
+```go showLineNumbers startLineNumber=195
 //go:nosplit
 func readRandom(r []byte) int {
     arc4random_buf(unsafe.Pointer(&r[0]), int32(len(r)))
@@ -277,7 +283,7 @@ func readRandom(r []byte) int {
 The name "darwin" suggests this is part of the runtimes Darwin/macOS specific code.
 If we have a look at the [Mac OS 15.6 Manual Page entry for `arc4random_buf`](https://manp.gs/mac/3/arc4random_buf)[^3] it tells us that the `arc4random` and related functions are the preferred way of generating random numbers. Meaning RC4, or rather a function that once used RC4, is being used as a pseudo-random number generator in the runtime.
 
-> [!INFO]
+> [!NOTE]
 >
 > If you have paid close attention to the Man Page you might have noticed that `arc4random_buf` is part of the stdlib. But Go doesn't link libc during  the build process, so how can Go still acess that? Go resolves these symbols at runtime and makes direct calls so that it can make use of libc.
 > This might sometimes be necessary, especially for Darwin/macOS which doesn't provide a stable syscall ABI and therefore advises the use of libc.
@@ -286,7 +292,7 @@ If we have a look at the [Mac OS 15.6 Manual Page entry for `arc4random_buf`](ht
 >
 >In [`sys_darwin.go`](https://cs.opensource.google/go/go/+/refs/tags/go1.24.3:src/runtime/sys_darwin.go;l=574-581;>drc=311372c53c21740c3427f08470ed1acd1c89f81b):
 >
->```go { linenos=inline, linenostart=574}
+>```go showLineNumbers startLineNumber=574
 >//go:nosplit
 >//go:cgo_unsafe_args
 >func arc4random_buf(p unsafe.Pointer, n int32) {
@@ -299,7 +305,7 @@ If we have a look at the [Mac OS 15.6 Manual Page entry for `arc4random_buf`](ht
 >
 >In [`sys_darwin_amd64.s`](https://cs.opensource.google/go/go/+/refs/tags/go1.24.3:src/runtime/sys_darwin_amd64.s;l=503-507;>drc=43130aff52cdea05559feb9aa236efc8bbeb2677):
 >
->```nasm { linenos=inline, linenostart=503}
+>```txt showLineNumbers startLineNumber=503
 >TEXT runtime·arc4random_buf_trampoline(SB),NOSPLIT,$0
 >    MOVL    8(DI), SI    // arg 2 nbytes
 >    MOVQ    0(DI), DI    // arg 1 buf
@@ -313,7 +319,7 @@ If we have a look at the [Mac OS 15.6 Manual Page entry for `arc4random_buf`](ht
 
 ChaCha appears as part of the runtime in the [`rand.go` file](https://cs.opensource.google/go/go/+/refs/tags/go1.24.3:src/runtime/rand.go;l=153-180;drc=a947912d8ad5398a78f14ceaa80369f60a3f85f8):
 
-```go { linenos=inline, linenostart=153}
+```go showLineNumbers startLineNumber=153
 // rand returns a random uint64 from the per-m chacha8 state.
 // This is called from compiler-generated code.
 //
@@ -350,7 +356,7 @@ In this case the ChaCha algorithm is used as an internal rng for each of our mac
 
 AES via x86 extensions appears as part of the runtime in the [`asm_amd64.s` file](https://cs.opensource.google/go/go/+/refs/tags/go1.24.3:src/runtime/asm_amd64.s;l=1229-1251;drc=7f9edb42259114020c67eb51643e43cf5a2cf9a7):
 
-```go { linenos=inline, linenostart=1229, hl_lines=[12]}
+```go showLineNumbers startLineNumber=1229 {12}
 // AX: data
 // BX: hash seed
 // CX: length
@@ -390,7 +396,7 @@ We again open our executable in Ghidra und choose the *DWARF* Tab in the *Progra
 
 This screenshot shows the `aeshashbody` function from the `asm_amd64.s` file:
 
-![alt text](ghidra_aeshashbody.png)
+![](ghidra_aeshashbody.png)
 
 Okay, but were viewing actual actual instructions, not just debug information, right? Yes. The address of the `aeshashbody` function which Ghidra jumped to is `0x00463480`. Looking at the *Memory Map* again we can see that this is inside the TEXT section meaning executable instructions. The debug symbols just add proper names and information to these instructions.
 
@@ -398,7 +404,7 @@ If we want we can even view our executable without debug symbols side by side. W
 
 And we see that our executables match. It's just that we're missing debug info in the `sans_debug.exe`.
 
-![alt text](ghidra_debug_diff.png)
+![](ghidra_debug_diff.png)
 
 #### **VirusTotal Flags**
 
@@ -408,7 +414,7 @@ Sadly VirusTotal doesn't tell us where exactly the "sandboxes" have found the fl
 
 |                                                           |                                                                           |
 | --------------------------------------------------------- | ------------------------------------------------------------------------- |
-| ![alt text](capa.jpg) The capa logo under defense evasion | ![alt text](cape_sandbox.jpg) The CAPE Sandbox logo under defense evasion |
+| ![](capa.jpg) The capa logo under defense evasion | ![](cape_sandbox.jpg) The CAPE Sandbox logo under defense evasion |
 
 Again, sadly the [CAPE Sandbox Report on VirusTotal](https://www.virustotal.com/ui/file_behaviours/95ad16faede5a5c6d257daeb2220801614704576188a8c9abd0767e0455dafe2_CAPE%20Sandbox/html) doesn't tell us where these algorithms were detected. It doesn't even include defense evasion in the first place.
 The capa report also isn't included in VirusTotal.
@@ -1245,7 +1251,7 @@ $ addr2line -e main.exe 0x00443540
 
 `addr2line` tells us that the address `0x00443540` is in the go runtime in the file `proc.go` in line 6640.
 
-```go { linenos=inline, linenostart=6629}
+```go showLineNumbers startLineNumber=6629
 // pidleput puts p on the _Pidle list. now must be a relatively recent call
 // to nanotime or zero. Returns now or the current time if now was zero.
 //
@@ -1430,7 +1436,7 @@ TEXT runtime.pidleput(SB) /usr/lib/go/src/runtime/proc.go
 The first part matched by capa is the left shift mnemonic: `mnemonic: shl @ 0x4435E8, 0x44363B`.
 Thanks to the debug info the object-dump shows us which line of code these adresses belong to.
 
-```nasm
+```txt
   proc.go:6625          0x4435e8                d3e7                    SHLL CL, DI
   ...
   proc.go:6618          0x44363b                d3e7                    SHLL CL, DI
@@ -1438,7 +1444,7 @@ Thanks to the debug info the object-dump shows us which line of code these adres
 
 The first left shift instruction occurs in line 6625, inside the `clear` function:
 
-```go { linenos=inline, linenostart=6622, hl_lines=[4]}
+```go showLineNumbers startLineNumber=6622 {4}
 // clear clears P id's bit.
 func (p pMask) clear(id int32) {
   word := id / 32
@@ -1451,7 +1457,7 @@ Like the description of `clear` says the function clears the last `p` bits of th
 
 The second left shift instruction occurs in line 6618, inside the `set` function:
 
-```go { linenos=inline, linenostart=6615, hl_lines=[4]}
+```go showLineNumbers startLineNumber=6615 {4}
 // set sets P id's bit.
 func (p pMask) set(id int32) {
   word := id / 32
@@ -1465,7 +1471,7 @@ Similarly to the `clear` function the `set` function uses the left-shift to prep
 These functions were called in the lines 6650 and 6652 of `pidleput` respectively.
 They were inlined by the compiler because they're so small, which is why they are now part of `pidleputs` instructions.
 
-```go { linenos=inline, linenostart=6640, hl_lines=[11,13]}
+```go showLineNumbers startLineNumber=6640 {11,13}
 func pidleput(pp *p, now int64) int64 {
     assertLockHeld(&sched.lock)
 
@@ -1494,7 +1500,7 @@ func pidleput(pp *p, now int64) int64 {
 The right shifts are a little less obvious: \
 `shr @ 0x4435C5, 0x443618, 0x44368C`
 
-```text { hl_lines=[3,8,13] }
+```text {3,8,13}
 proc.go:6618          0x443613                89ca                    MOVL CX, DX
 proc.go:6618          0x443615                c1fa1f                  SARL $0x1f, DX
 proc.go:6618          0x443618                c1ea1b                  SHRL $0x1b, DX
@@ -1514,7 +1520,7 @@ We can see that objdump is reporting the same lines 6618 and 6625 for the first 
 That would be the mask creation in the `set` and `clear` function again.
 What we are actually looking for are the lines 6617 and 6624 responsible for dividing the id.
 
-```go { linenos=inline, linenostart=6615, hl_lines=[3,10]}
+```go showLineNumbers startLineNumber=6615 {3,10}
 // set sets P id's bit.
 func (p pMask) set(id int32) {
   word := id / 32
@@ -1570,7 +1576,7 @@ On the machine side this is done through right-shifting:
 
 **I illustrated this whole process for 16-bit integers:**
 
-![alt text](division_by_32.drawio.png)
+![Illustration of integer division correction](division_by_32.drawio.png)
 
 :::
 
@@ -1578,7 +1584,7 @@ So the first two right-shifts are legitimate. The third right-shift also happens
 
 `pidleput` calls the `start` function of a `limiterEvent` in `mgclimit.go`
 
-```go { linenos=inline, linenostart=6640, hl_lines=[17] }
+```go showLineNumbers startLineNumber=6640 {17}
 func pidleput(pp *p, now int64) int64 {
   assertLockHeld(&sched.lock)
 
@@ -1603,7 +1609,7 @@ func pidleput(pp *p, now int64) int64 {
 ```
 the `start` function in turn calls the `typ` function of a `limiterEventStamp`
 
-```go { linenos=inline, linenostart=409, hl_lines=[2] }
+```go showLineNumbers startLineNumber=409 {2}
 func (e *limiterEvent) start(typ limiterEventType, now int64) bool {
   if limiterEventStamp(e.stamp.Load()).typ() != limiterEventNone {
     return false
@@ -1614,7 +1620,7 @@ func (e *limiterEvent) start(typ limiterEventType, now int64) bool {
 ```
 which in turn uses a right-shift to extract the `limiterEventType` from the `limiterEventStamp`.
 
-```go { linenos=inline, linenostart=390, hl_lines=[2] }
+```go showLineNumbers startLineNumber=390 {2}
 func (s limiterEventStamp) typ() limiterEventType {
   return limiterEventType(s >> (64 - limiterEventBits))
 }
@@ -1630,7 +1636,7 @@ The first number `0x3F` which is usually used in modulo 64 calculations is at ad
 
 We begin by calling `start` of the `limiterEvent`.
 
-```go { linenos=inline, linenostart=6640, hl_lines=[17] }
+```go showLineNumbers startLineNumber=6640 {17}
 func pidleput(pp *p, now int64) int64 {
   assertLockHeld(&sched.lock)
 
@@ -1658,7 +1664,7 @@ Notice that we passed `limiterEventIdle`, a constant with a value of 3 to `start
 
 :::fold[limiterEvents]
 
-```go { linenos=inline, linenostart=350, hl_lines=[6]}
+```go showLineNumbers startLineNumber=350 {6}
 const (
   limiterEventNone           limiterEventType = iota // None of the following events.
   limiterEventIdleMarkWork                           // Refers to an idle mark worker (see gcMarkWorkerMode).
@@ -1674,7 +1680,7 @@ const (
 
 Next the `start` function calls `makeLimiterEventStamp`, passing the previous `limiterEventIdle` constant:
 
-```go { linenos=inline, linenostart=409, hl_lines=[5]}
+```go showLineNumbers startLineNumber=409 {5}
 func (e *limiterEvent) start(typ limiterEventType, now int64) bool {
   if limiterEventStamp(e.stamp.Load()).typ() != limiterEventNone {
     return false
@@ -1686,7 +1692,7 @@ func (e *limiterEvent) start(typ limiterEventType, now int64) bool {
 
 The `makeLimiterEventStamp` function is now where our magic number `0x3F` was reported.
 
-```go { linenos=inline, linenostart=371, hl_lines=[2]}
+```go showLineNumbers startLineNumber=371 {2}
 func makeLimiterEventStamp(typ limiterEventType, now int64) limiterEventStamp {
   return limiterEventStamp(uint64(typ)<<(64-limiterEventBits) | (uint64(now) &^ limiterEventTypeMask))
 }
@@ -1717,7 +1723,7 @@ BTSQ $0x3f, DX
 
 As for the number `0x3D`, which might be an ASCII equal-sign (`=`) used for padding in base64, it's the same story.
 Just replace the `limiterEventBits` with 3 again and you get the value 61 in the `typ` function
-```go { linenos=inline, linenostart=409 }
+```go showLineNumbers startLineNumber=409
 func (s limiterEventStamp) typ() limiterEventType {
   return limiterEventType(s >> (64 - limiterEventBits))
 }

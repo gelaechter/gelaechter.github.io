@@ -16,7 +16,7 @@ description: In this Post I describe how we can use Kitty's ANSI output in combi
 > 
 > - Install [Kitty](https://sw.kovidgoyal.net/Kitty/)
 > - Put this into your Kitty.conf:
->     ```conf
+>     ```txt
 >     clipboard_control write-clipboard read-clipboard
 >     map ctrl+shift+c combine : copy_ansi_to_clipboard : launch --type overlay-main sh -c "kitten clipboard --get-clipboard | sed -e 's|\\x1b\\\\||g' -e 's|\\x1b\\]133;[A-Z]||g' | kitten clipboard"
 >     ```
