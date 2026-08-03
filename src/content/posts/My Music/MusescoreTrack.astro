@@ -1,0 +1,96 @@
+---
+const audio: any = import.meta.glob("./**/*.mp3", {
+  eager: true,
+});
+
+const pdf: any = import.meta.glob("./**/*.pdf", {
+  eager: true,
+});
+
+const mscz: any = import.meta.glob("./**/*.mscz", {
+  eager: true,
+});
+
+const { dir_name } = Astro.props;
+
+const audioSrc = audio[`./${dir_name}/${dir_name}.mp3`]?.default;
+const pdfSrc = pdf[`./${dir_name}/${dir_name}.pdf`]?.default;
+const msczSrc = mscz[`./${dir_name}/${dir_name}.mscz`]?.default;
+
+if (!audioSrc) {
+  throw new Error(`Audio source for track "${dir_name}" missing, run make!`);
+}
+
+if (!pdfSrc) {
+  throw new Error(`Pdf source for track "${dir_name}" missing, run make!`);
+}
+
+if (!msczSrc) {
+  throw new Error(`Mscz source for track "${dir_name}" missing, run make!`);
+}
+---
+
+<style>
+  body {
+    font-family:
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      sans-serif;
+    margin: 2rem;
+    max-width: 900px;
+  }
+
+  .audio-row {
+    display: flex;
+    align-items: stretch;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  audio {
+    flex: 1;
+    min-width: 0; /* allows shrinking in flex */
+  }
+
+  .download-btn {
+    align-content: center;
+    font-size: 0.8rem;
+    padding: 0.25rem 0.5rem;
+    text-decoration: none;
+    border: 2px solid #333;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+
+  .pdf-container {
+    width: 100%;
+    height: 600px;
+    border: 1px solid #ddd;
+  }
+
+  iframe,
+  embed,
+  object {
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+</style>
+
+<div class="audio-row">
+  <audio controls>
+    <!-- Replace with your audio file -->
+    <source src={audioSrc} type="audio/mpeg" />
+    Your browser does not support the audio element.
+  </audio>
+
+  <a class="download-btn" href={msczSrc} download>Get the score</a>
+</div>
+
+<embed
+  src={pdfSrc}
+  type="application/pdf"
+  style="aspect-ratio: 1 / sqrt(2) !important"
+/>

@@ -83,6 +83,7 @@ export default defineConfig({
     },
   },
   vite: {
+    assetsInclude: ['**/*.mscz'],
     plugins: [
       {
         name: 'prefix-font-urls-with-base',
@@ -97,6 +98,11 @@ export default defineConfig({
     ],
     build: {
       chunkSizeWarningLimit: 600,
+      rollupOptions: {
+        output: {
+          assetFileNames: 'static/[name][extname]',
+        },
+      },
     },
   },
   devToolbar: {

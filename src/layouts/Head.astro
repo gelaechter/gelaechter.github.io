@@ -124,7 +124,7 @@ const pageImage = postSlug
   function initTheme(doc = document) {
     const isDark = isCurrentDark()
     doc.documentElement.classList.toggle('dark', isDark)
-    doc.documentElement.setAttribute("data-theme", isDark ? "github-dark" : "github-light");
+    doc.documentElement.setAttribute('data-theme', isDark ? 'github-dark' : 'github-light')
 
     // Update meta theme-color tag
     const metaThemeColor = doc.head.querySelector('meta[name="theme-color"]')
@@ -203,13 +203,18 @@ const pageImage = postSlug
 )}
 
 <!-- Fix Firefox video MIME issues: https://github.com/withastro/astro/issues/13477 -->
-  <script>
-    document.addEventListener("astro:after-swap", () =>
-      document.querySelectorAll("video").forEach(
-        (v) =>
-          // eslint-disable-next-line no-self-assign
-          v.closest("[data-astro-transition-persist]") || (v.src = v.src),
-      ),
-    );
-  </script>
+<script>
+  document.addEventListener('astro:after-swap', () => {
+    document.querySelectorAll('video').forEach(
+      v =>
+      // eslint-disable-next-line no-self-assign
+        v.closest('[data-astro-transition-persist]') || (v.src = v.src),
+    )
+  document.querySelectorAll('source').forEach(
+      s =>
+      // eslint-disable-next-line no-self-assign
+        s.closest('[data-astro-transition-persist]') || (s.src = s.src),
+    )
+  })
+</script>
 </head>

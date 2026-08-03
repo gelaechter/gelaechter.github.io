@@ -120,10 +120,10 @@ function handleClick(event: MouseEvent) {
   }
 
   // Ignore small or incomplete images
-  if (!target.complete ||
-      target.width < 100 ||
-      target.height < 100 ||
-      target.classList.contains("nozoom")) {
+  if (!target.complete
+    || target.width < 100
+    || target.height < 100
+    || target.classList.contains('nozoom')) {
     return
   }
 
