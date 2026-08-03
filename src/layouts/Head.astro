@@ -1,5 +1,4 @@
 ---
-import { ClientRouter } from 'astro:transitions'
 import katexCSS from 'katex/dist/katex.min.css?url'
 import { allLocales, base, defaultLocale, themeConfig } from '@/config'
 import { ui } from '@/i18n/ui'
@@ -89,9 +88,6 @@ const pageImage = postSlug
 {bing && <meta name="msvalidate.01" content={bing} />}
 {yandex && <meta name="yandex-verification" content={yandex} />}
 {baidu && <meta name="baidu-site-verification" content={baidu} />}
-
-<!-- Global View Transition -->
-<ClientRouter fallback="none" />
 
 <!-- Theme Toggle -->
 <script
@@ -201,20 +197,4 @@ const pageImage = postSlug
     data-website-id={umamiAnalyticsID}
   />
 )}
-
-<!-- Fix Firefox video MIME issues: https://github.com/withastro/astro/issues/13477 -->
-<script>
-  document.addEventListener('astro:after-swap', () => {
-    document.querySelectorAll('video').forEach(
-      v =>
-      // eslint-disable-next-line no-self-assign
-        v.closest('[data-astro-transition-persist]') || (v.src = v.src),
-    )
-  document.querySelectorAll('source').forEach(
-      s =>
-      // eslint-disable-next-line no-self-assign
-        s.closest('[data-astro-transition-persist]') || (s.src = s.src),
-    )
-  })
-</script>
 </head>
