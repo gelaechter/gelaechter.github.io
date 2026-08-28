@@ -10,8 +10,9 @@ all: $(MP3_FILES) $(PDF_FILES)
 	@echo "Generating mp3 for $*"
 	mscore "$<" -o "$@.midi"
 # Pianoteq needs lame
-	ln -sf $$(command -v lame) ./lame 
-	pianoteq-stage9 --headless --midi "$@.midi" --mp3 "$@"
+	ln -sf $$(command -v lame) ./lame
+	@if [ -f "$*.fxp" ]; then FXP="--fxp \"$*.fxp\""; else FXP=""; fi; \
+	pianoteq-stage9 --headless --midi "$@.midi" --mp3 "$@" $$FXP
 	rm "$@.midi"
 	rm ./lame
 	@clear
